@@ -1,0 +1,64 @@
+﻿{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "RomaF5BdContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": true,
+   "ModelNamespace": null,
+   "OutputContextPath": "Data",
+   "OutputPath": "Models",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "RomaF5patioComidas",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[Bebida]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ItemPedido]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Menu]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Mesa]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Pedido]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TipoBebida]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TipoMenu]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "ALEJANDRO.RomaF5Bd",
+   "UncountableWords": null,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false,
+   "UseT4": false
+}

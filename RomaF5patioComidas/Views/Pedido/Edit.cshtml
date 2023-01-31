@@ -1,0 +1,61 @@
+﻿@model RomaF5patioComidas.Models.Pedido
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Pedido</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="IdPedido" />
+            <div class="form-group">
+                <label asp-for="IdBebidaNavigation" class="control-label"></label>
+                <select asp-for="IdBebida" class="form-control" asp-items="ViewBag.bebidaNombre"></select>
+                <span asp-validation-for="IdBebida" class="text-danger"></span>
+            </div>
+             <div class="form-group">
+                <label asp-for="IdBebida" class="control-label"></label>
+                <select asp-for="IdBebida" class="form-control" asp-items="ViewBag.bebidaMarca"></select>
+                <span asp-validation-for="IdBebida" class="text-danger"></span>
+            </div>
+              <div class="form-group">
+                <label asp-for="CantidadBebida" class="control-label"></label>
+                <input asp-for="CantidadBebida" class="form-control" />
+                <span asp-validation-for="CantidadBebida" class="text-danger"></span>
+            </div>           
+             <div class="form-group">
+                <label asp-for="Idmenu" class="control-label"></label>
+                <select asp-for="Idmenu" class="form-control" asp-items="ViewBag.MenuDescripcion"></select>
+                <span asp-validation-for="Idmenu" class="text-danger"></span>
+            </div>
+                <div class="form-group">
+                <label asp-for="CantidadMenu" class="control-label"></label>
+                <input asp-for="CantidadMenu" class="form-control" />
+                <span asp-validation-for="CantidadMenu" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdMesaNavigation" class="control-label"></label>
+                <select asp-for="IdMesa" class="form-control" asp-items="ViewBag.idMesa"></select>
+                <span asp-validation-for="IdMesa" class="text-danger"></span>
+            </div>                        
+           
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-route-id="@Model.IdMesa" asp-action="Details">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

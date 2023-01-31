@@ -1,0 +1,90 @@
+﻿@model IEnumerable<RomaF5patioComidas.Models.Mesa>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Patio de Comidas</h1>
+    <p>Drink && Food</p>
+</div>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Crear Mesa</a>
+</p>
+
+<div class="container-md">
+    <div class="row align-items-start">
+        @foreach (var mesa in Model)
+        {
+            if (mesa.Estado == true)
+            {
+                <div class="col">
+                    <div class="card-group" >
+                        <div class="card">                           
+                            <div  align="center" class="card-body">
+                                <h5 class="card-title">@mesa.Descripcion</h5>
+                                <div class="d-md-inline-flex">
+                                    <a class="btn btn-primary btn-sm" asp-route-id="@mesa.IdMesa" asp-area="" asp-controller="Pedido" asp-action="Details" role="button">Detalle</a>
+                                    <a class="btn btn-secondary btn-sm" asp-route-id="@mesa.IdMesa" asp-area="" asp-controller="Pedido" asp-action="Create" role="button">Agregar</a>
+                                </div>
+                            </div>
+                            <div align="center" class="card-footer text-muted">
+                                 <a class="btn btn-danger btn-sm" asp-route-id="@mesa.IdMesa" asp-area="" asp-controller="Pedido" asp-action="Cobrar" role="button">Cobrar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            }
+            else
+            {
+                
+                <div class="col">
+                    <div class="card-group" >
+                        <div class="card">
+                            <div align="center" class="card-body  ">
+                                <h5 class="card-title">@mesa.Descripcion</h5>
+                                <div class="d-md-inline-flex">
+                                    <a class="btn btn-primary btn-sm" asp-area="" asp-controller="Pedido" asp-action="Create" role="button" asp-route-id="@mesa.IdMesa">Pedido</a>
+                                    <a class="btn btn-warning btn-sm" asp-area="" asp-controller="Bebidas" asp-action="Index" role="button">Reserva</a>
+                                </div>
+                                <a asp-action="Delete" asp-route-id="@mesa.IdMesa">Borrar</a>
+                                <a asp-action="Edit" asp-route-id="@mesa.IdMesa">Editar</a>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        
+        }
+    </div>
+</div>
+@*<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Descripcion)
+            </th>
+         
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Descripcion)
+            </td>
+        
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.IdMesa">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.IdMesa">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.IdMesa">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>*@

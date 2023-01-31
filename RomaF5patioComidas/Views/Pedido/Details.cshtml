@@ -1,0 +1,76 @@
+﻿@model IEnumerable<RomaF5patioComidas.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Detalle</h1>
+ 
+<table class="table">
+    <thead>
+        <tr>          
+            <th>
+                @Html.DisplayNameFor(model => model.IdBebida)
+            </th>   
+             <th>
+                @Html.DisplayNameFor(model => model.CantidadBebida)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdmenuNavigation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CantidadMenu)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdMesaNavigation)
+            </th>           
+            <th>
+                @Html.DisplayNameFor(model => model.Fecha)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Total)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>              
+                <td>
+                    @Html.DisplayFor(modelItem => item.IdBebidaNavigation.Marca)
+                </td>  
+                 <td>
+                    @Html.DisplayFor(modelItem => item.CantidadBebida)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IdmenuNavigation.Descripcion)
+                </td>
+                 <td>
+                    @Html.DisplayFor(modelItem => item.CantidadMenu)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IdMesaNavigation.Descripcion)
+                </td>                   
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fecha)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Total)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdPedido">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdPedido">Borrar</a>
+                </td>
+            </tr>
+
+        }
+        <tr >
+            <th align="left">
+                Total =  @ViewBag.total
+            </th>             
+        </tr>
+
+    </tbody>
+</table>
