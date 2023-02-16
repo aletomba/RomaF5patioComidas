@@ -20,11 +20,12 @@ namespace RomaF5patioComidas.Data
         }
 
         public virtual DbSet<Bebida> Bebida { get; set; }
+        public virtual DbSet<CategoriaUser> CategoriaUser { get; set; }
         public virtual DbSet<Menu> Menu { get; set; }
         public virtual DbSet<Mesa> Mesa { get; set; }
         public virtual DbSet<Pedido> Pedido { get; set; }
         public virtual DbSet<TipoBebida> TipoBebida { get; set; }
- 
+        public virtual DbSet<Usuario> Usuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,6 +56,17 @@ namespace RomaF5patioComidas.Data
                     .HasForeignKey(d => d.IdTipobebida)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Bebida_TipoBebida");
+            });
+
+            modelBuilder.Entity<CategoriaUser>(entity =>
+            {
+                entity.HasKey(e => e.IdCategoria);
+
+                entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
+
+                entity.Property(e => e.Categoria).HasColumnName("categoria");
+
+                
             });
 
             modelBuilder.Entity<Menu>(entity =>
@@ -91,9 +103,11 @@ namespace RomaF5patioComidas.Data
 
                 entity.Property(e => e.Estado).HasColumnName("estado");
 
-                entity.Property(e => e.Reserva)
+                entity.Property(e => e.NombreReserva)
                     .HasMaxLength(50)
-                    .HasColumnName("reserva");
+                    .HasColumnName("nombreReserva");
+
+                entity.Property(e => e.Reserva).HasColumnName("reserva");
             });
 
             modelBuilder.Entity<Pedido>(entity =>
@@ -107,6 +121,8 @@ namespace RomaF5patioComidas.Data
                 entity.Property(e => e.CantidadMenu).HasColumnName("cantidadMenu");
 
                 entity.Property(e => e.Eliminar).HasColumnName("eliminar");
+
+                entity.Property(e => e.Estado).HasColumnName("estado");
 
                 entity.Property(e => e.Fecha)
                     .HasColumnType("datetime")
@@ -142,9 +158,7 @@ namespace RomaF5patioComidas.Data
             {
                 entity.HasKey(e => e.IdTipobebida);
 
-                entity.Property(e => e.IdTipobebida)
-                    .ValueGeneratedNever()
-                    .HasColumnName("idTipobebida");
+                entity.Property(e => e.IdTipobebida).HasColumnName("idTipobebida");
 
                 entity.Property(e => e.Descripcion)
                     .HasMaxLength(50)
@@ -153,6 +167,31 @@ namespace RomaF5patioComidas.Data
                 entity.Property(e => e.Eliminar).HasColumnName("eliminar");
 
                 entity.Property(e => e.Litros).HasColumnName("litros");
+            });
+
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasKey(e => e.IdUser);
+
+                entity.Property(e => e.IdUser).HasColumnName("idUser");
+
+                entity.Property(e => e.Clave)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("clave");
+
+                entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
+
+                entity.Property(e => e.Usuario1)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("usuario");
+
+                entity.HasOne(d => d.IdCategoriaNavigation)
+                    .WithMany(p => p.CategoriaNavigation)
+                    .HasForeignKey(d => d.IdCategoria)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Usuario_CategoriaUser");
             });
 
             OnModelCreatingPartial(modelBuilder);

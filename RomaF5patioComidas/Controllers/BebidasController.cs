@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using RomaF5patioComidas.Models;
 
 namespace RomaF5patioComidas.Controllers
 {
+    [Authorize(Roles = "ADMIN")]
     public class BebidasController : Controller
     {
         private readonly RomaF5BdContext _context;

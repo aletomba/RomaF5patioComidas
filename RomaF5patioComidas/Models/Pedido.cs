@@ -11,7 +11,6 @@ namespace RomaF5patioComidas.Models
         public int IdPedido { get; set; }
         [Display(Name = "Bebida")]
         public int IdBebida { get; set; }
-        [Display(Name = "Menu")]
         public int Idmenu { get; set; }
         public double? Total { get; set; }
         [Display(Name = "Cantidad")]
@@ -20,8 +19,10 @@ namespace RomaF5patioComidas.Models
         public int? CantidadBebida { get; set; }
         public bool? Eliminar { get; set; }
         public int? IdMesa { get; set; }
+        [Display(Name = "Fecha y Hora")]
         public DateTime? Fecha { get; set; }
-
+        public bool? Estado { get; set; }
+        
         public virtual Bebida IdBebidaNavigation { get; set; }
         [Display(Name = "Mesa")]
         public virtual Mesa IdMesaNavigation { get; set; }

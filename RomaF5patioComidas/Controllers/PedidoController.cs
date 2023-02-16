@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RomaF5patioComidas.Data;
@@ -7,6 +8,7 @@ using RomaF5patioComidas.Models;
 
 namespace RomaF5patioComidas.Controllers
 {
+    [Authorize]
     public class PedidoController : Controller
     {
 
@@ -24,7 +26,13 @@ namespace RomaF5patioComidas.Controllers
 
             var pedidoRoma = _context.Pedido.Include(x => x.IdBebidaNavigation).
                 Include(x => x.IdmenuNavigation).Include(x=>x.IdMesaNavigation).
-                Where(x=>x.Eliminar == false || x.Eliminar == null);
+                Where(x=>x.Eliminar == false || x.Eliminar == null && x.Fecha.Value.Date == DateTime.Today.Date);
+            double? total = 0;
+            foreach (var item in pedidoRoma)
+            {
+                total += item.Total;
+            }
+            ViewData["Total"] = total;
             return View(await pedidoRoma.ToListAsync());
         }
 
@@ -35,7 +43,7 @@ namespace RomaF5patioComidas.Controllers
             var pedidoRoma = await _context.Pedido.Include(x => x.IdBebidaNavigation)
                                                   .Include(x => x.IdmenuNavigation)
                                                   .Include(x => x.IdMesaNavigation)
-                                                  .Where(x=>x.Eliminar == false || x.Eliminar == null && x.IdMesa == id && x.IdMesaNavigation.Estado == true)
+                                                  .Where(x => x.Eliminar == false || x.Eliminar == null && x.IdMesa == id && x.Estado == true)
                                                   .ToListAsync();
             double? total = 0;
             foreach (var item in pedidoRoma)
@@ -44,6 +52,7 @@ namespace RomaF5patioComidas.Controllers
             }
 
             ViewData["Total"] = total;
+            ViewData["idmesa"] = id;
             return View(pedidoRoma);
         }
 
@@ -79,6 +88,7 @@ namespace RomaF5patioComidas.Controllers
             if (ModelState.IsValid)
             {              
                 pedido.Fecha = DateTime.Now;
+                pedido.Estado = true;
                 var precioBebida = bebida.Precio * pedido.CantidadBebida;
                 var precioMenu = menu.Precio * pedido.CantidadMenu;
                 pedido.Total = precioBebida + precioMenu;   
@@ -210,8 +220,20 @@ namespace RomaF5patioComidas.Controllers
             {
                 return NotFound();
             }
+            var pedidoRoma = await _context.Pedido.Include(x => x.IdBebidaNavigation)
+                                                 .Include(x => x.IdmenuNavigation)
+                                                 .Include(x => x.IdMesaNavigation)
+                                                 .Where(x => x.Eliminar == false || x.Eliminar == null && x.IdMesa == id && x.Estado == true)
+                                                 .ToListAsync();
+            foreach(var item in pedidoRoma)
+            {
+                item.Estado = false;
+                _context.Update(item);
+            }
+
             var mesa = await _context.Mesa.FindAsync(id);
-            mesa.Estado = false;            
+            mesa.Estado = false;
+            mesa.Reserva = false;
             _context.Update(mesa);
             await _context.SaveChangesAsync();
            return RedirectToAction("Index", "Mesas");

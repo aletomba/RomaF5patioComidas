@@ -15,8 +15,9 @@ namespace RomaF5patioComidas.Models
         public int IdMesa { get; set; }
         public string Descripcion { get; set; }
         public bool? Estado { get; set; }
-        public string Reserva { get; set; }
+        public bool? Reserva { get; set; }
         public bool? Eliminar { get; set; }
+        public string NombreReserva { get; set; }
 
         public virtual ICollection<Pedido> Pedido { get; set; }
     }

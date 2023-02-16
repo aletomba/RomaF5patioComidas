@@ -34,7 +34,7 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody>        
         @foreach (var item in Model)
         {
             <tr>              
@@ -69,7 +69,18 @@
         <tr >
             <th align="left">
                 Total =  @ViewBag.total
-            </th>             
+            </th>  
+            <th> </th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+             <th></th>
+            <th >
+                <div align="right">
+                    <a class="btn btn-danger btn-md" asp-route-id = "@ViewBag.idmesa" asp-area="" asp-controller="Pedido" asp-action="Cobrar" role="button">Cobrar</a>
+                </div>
+            </th>   
         </tr>
 
     </tbody>
