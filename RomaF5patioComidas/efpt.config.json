@@ -4,7 +4,7 @@
    "ContextNamespace": null,
    "DefaultDacpacSchema": null,
    "FilterSchemas": false,
-   "IncludeConnectionString": true,
+   "IncludeConnectionString": false,
    "ModelNamespace": null,
    "OutputContextPath": "Data",
    "OutputPath": "Models",
@@ -19,7 +19,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[ItemPedido]",
+         "Name": "[dbo].[CategoriaUser]",
          "ObjectType": 0
       },
       {
@@ -39,7 +39,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[TipoMenu]",
+         "Name": "[dbo].[Usuario]",
          "ObjectType": 0
       }
    ],
@@ -47,6 +47,7 @@
    "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
+   "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": false,
    "UseFluentApiOnly": true,
    "UseHandleBars": false,

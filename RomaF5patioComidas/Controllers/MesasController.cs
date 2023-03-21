@@ -1,163 +1,198 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RomaF5patioComidas.Data;
 using RomaF5patioComidas.Models;
+using RomaF5patioComidas.Services.MesaService;
 
 namespace RomaF5patioComidas.Controllers
 {
+    [Authorize]
     public class MesasController : Controller
     {
-        private readonly RomaF5BdContext _context;
+       
+        private readonly IMesaService _service;
 
-        public MesasController(RomaF5BdContext context)
+        public MesasController(IMesaService service)
         {
-            _context = context;
+            
+            _service = service;
         }
 
-        // GET: Mesas
+
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Mesa.Where(x=>x.Eliminar == false || x.Eliminar == null ).ToListAsync());
+            try
+            {
+                ViewData["Cobrado"] = Request.Cookies["user"];
+                Response.Cookies.Delete("user");
+
+                return View(await _service.GetMesa());
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
-        // GET: Mesas/Details/5
+
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Mesa == null)
+            if (id != null) return NotFound();
+            try
             {
-                return NotFound();
-            }
-
-            var mesa = await _context.Mesa
-                .FirstOrDefaultAsync(m => m.IdMesa == id);
-            if (mesa == null)
+                return View( await _service.GetById(id));                
+            }          
+            catch (BadHttpRequestException ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-
-            return View(mesa);
         }
 
-        // GET: Mesas/Create
+
+        [Authorize(Roles = "ADMIN")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Mesas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( Mesa mesa)
+        public async Task<IActionResult> Create(Mesa mesa)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(mesa);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _service.Create(mesa);                    
+                }
+                catch (DbUpdateException ex)
+                {
+                    return NotFound(ex.Message);
+                }
                 return RedirectToAction(nameof(Index));
+
             }
             return View(mesa);
         }
 
-        // GET: Mesas/Edit/5
+
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Mesa == null)
+            if (id != null) return NotFound();
+            try
             {
-                return NotFound();
-            }
-
-            var mesa = await _context.Mesa.FindAsync(id);
-            if (mesa == null)
+                return View(await _service.GetById(id));
+            }          
+            catch (BadHttpRequestException ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-            return View(mesa);
         }
 
-        // POST: Mesas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdMesa,Descripcion,Estado,Eliminar")] Mesa mesa)
-        {
-            if (id != mesa.IdMesa)
-            {
-                return NotFound();
-            }
+        public async Task<IActionResult> Edit([Bind("IdMesa,Descripcion,Estado,Eliminar")] Mesa mesa)
+        {          
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(mesa);
-                    await _context.SaveChangesAsync();
+                    await _service.Update(mesa);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException ex)
                 {
-                    if (!MesaExists(mesa.IdMesa))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                  return NotFound(ex.Message);
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(mesa);
         }
 
-        // GET: Mesas/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+
+        [HttpGet]
+        public async Task<IActionResult> Reserva(int? id)
         {
-            if (id == null || _context.Mesa == null)
+            if (id != null) return NotFound();
+            try
             {
-                return NotFound();
-            }
-
-            var mesa = await _context.Mesa
-                .FirstOrDefaultAsync(m => m.IdMesa == id);
-            if (mesa == null)
+                return View(await _service.GetById(id));
+            }           
+            catch (BadHttpRequestException ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-
-            return View(mesa);
         }
 
-        // POST: Mesas/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Mesa == null)
+        public async Task<IActionResult> Reserva(Mesa mesa)
+        {           
+            if (ModelState.IsValid)
             {
-                return Problem("Entity set 'RomaF5BdContext.Mesa'  is null.");
+                try
+                {
+                    await _service.Reserva(mesa);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    return BadRequest(ex.Message);
+                }
             }
-            var mesa = await _context.Mesa.FindAsync(id);
-            if (mesa != null)
-            {
-               mesa.Eliminar = true;
-                _context.Update(mesa);
-                await _context.SaveChangesAsync();
-            }
-            
-            
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MesaExists(int? id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarReserva(int? id)
         {
-          return _context.Mesa.Any(e => e.IdMesa == id);
+            if (id != null) return NotFound();
+            try
+            {
+                await _service.EliminarReserva(id);
+            }
+            catch (DbUpdateException ex)
+            {
+                return NotFound(ex.Message);
+            }           
+            return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id != null) return NotFound();
+            try
+            {
+                var mesa = await _service.GetById(id);
+                return View(mesa);
+            }         
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }          
+        }
+
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Mesa mesa)
+        {
+            try
+            {
+               await _service.Delete(mesa);
+            }
+            catch(DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+      
     }
 }

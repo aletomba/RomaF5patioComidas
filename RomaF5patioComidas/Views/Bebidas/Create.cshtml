@@ -1,4 +1,5 @@
-﻿@model RomaF5patioComidas.Models.Bebida
+﻿
+@model RomaF5patioComidas.Models.Bebida
 
 @{
     ViewData["Title"] = "Create";
@@ -15,12 +16,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
+                <input asp-for="Nombre" class="form-control" autocomplete="off" />
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Marca" class="control-label"></label>
-                <input asp-for="Marca" class="form-control" />
+                <input asp-for="Marca" class="form-control" autocomplete="off" />
                 <span asp-validation-for="Marca" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -34,9 +35,9 @@
                 <span asp-validation-for="Stock" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="IdTipobebidaNavigation.Descripcion" class="control-label"></label>
-                <select asp-for="IdTipobebida" class ="form-control" asp-items="ViewBag.IdTipobebida"></select>
-            </div>         
+                <label asp-for="IdTipobebidaNavigation.Descripcion" class="control-label"></label>                
+                <select asp-for="IdTipobebida" class ="form-control" asp-items="@ViewBag.IdTipobebida"></select>
+            </div>
             <div class="form-group">
                 <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>
@@ -49,5 +50,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

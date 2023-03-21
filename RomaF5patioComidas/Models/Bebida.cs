@@ -2,6 +2,7 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace RomaF5patioComidas.Models
 {
@@ -13,9 +14,13 @@ namespace RomaF5patioComidas.Models
         }
 
         public int IdBebida { get; set; }
+        [Required]
         public string Nombre { get; set; }
+        [Required]
         public string Marca { get; set; }
+        [Required]
         public double? Precio { get; set; }
+        [Required]
         public int? Stock { get; set; }
         public int IdTipobebida { get; set; }
         public bool? Eliminar { get; set; }

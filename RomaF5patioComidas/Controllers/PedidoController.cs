@@ -1,207 +1,236 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RomaF5patioComidas.Data;
 using RomaF5patioComidas.Models;
-
+using RomaF5patioComidas.Services.BebidasServices;
+using RomaF5patioComidas.Services.MenuService;
+using RomaF5patioComidas.Services.MesaService;
+using RomaF5patioComidas.Services.PedidoService;
 
 namespace RomaF5patioComidas.Controllers
 {
+    [Authorize]
     public class PedidoController : Controller
     {
 
-        private readonly RomaF5BdContext _context;       
+        private readonly RomaF5BdContext _context;
+        private readonly IPedidoService _pedidoService;
+        private readonly IBebidaService _bebidaService;
+        private readonly IMenuService _menuService;
+        private readonly IMesaService _mesaService;
 
-        public PedidoController(RomaF5BdContext context)
+        public PedidoController(RomaF5BdContext context, IPedidoService pedidoService,
+                                IBebidaService bebidaService, IMenuService menuService, IMesaService mesaService)
         {
-            _context = context; 
-            
+            _context = context;
+            _pedidoService = pedidoService;
+            _bebidaService = bebidaService;
+            _menuService = menuService;
+            _mesaService = mesaService;
         }
 
-        // GET: PedidoController
+
         public async Task<ActionResult> Index()
         {
+            try
+            {
+                var pedidoRoma = await _pedidoService.GetPedido();
+                double? total = 0;
+                foreach (var item in pedidoRoma)
+                {
+                    total += item.Total;
+                }
+                ViewData["Total"] = total;
+                return View(pedidoRoma);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
+            }
 
-            var pedidoRoma = _context.Pedido.Include(x => x.IdBebidaNavigation).
-                Include(x => x.IdmenuNavigation).Include(x=>x.IdMesaNavigation).
-                Where(x=>x.Eliminar == false || x.Eliminar == null);
-            return View(await pedidoRoma.ToListAsync());
         }
 
-        // GET: PedidoController/Details/5
+
         public async Task<ActionResult> Details(int? id)
         {
-            //var mesaPedido = await _context.Mesa.Include(x => x.Pedido).Where(x => x.Estado == true && x.IdMesa == id).ToListAsync();
-            var pedidoRoma = await _context.Pedido.Include(x => x.IdBebidaNavigation)
-                                                  .Include(x => x.IdmenuNavigation)
-                                                  .Include(x => x.IdMesaNavigation)
-                                                  .Where(x=>x.Eliminar == false || x.Eliminar == null && x.IdMesa == id && x.IdMesaNavigation.Estado == true)
-                                                  .ToListAsync();
-            double? total = 0;
-            foreach (var item in pedidoRoma)
+            try
             {
-                total += item.Total;
+                var pedidoRoma = await _pedidoService.Details(id);
+                double? total = 0;
+                foreach (var item in pedidoRoma)
+                {
+                    total += item.Total;
+                }
+
+                ViewData["Total"] = total;
+                ViewData["idmesa"] = id;
+                return View(pedidoRoma);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
             }
 
-            ViewData["Total"] = total;
-            return View(pedidoRoma);
         }
 
 
 
-        // GET: PedidoController/Create
+
         public ActionResult Create(int? id)
-        {             
-         
-            ViewData["bebidaMarca"] = new SelectList(_context.Bebida.
-                Where(x => x.Eliminar == false || x.Eliminar == null), "IdBebida", "Marca");           
-            ViewData["MenuDescripcion"] = new SelectList(_context.Menu, "IdMenu", "Descripcion");
-            ViewData["idMesa"] = new SelectList(_context.Mesa.
-                Where(x=>x.Eliminar == false || x.Eliminar == null && x.IdMesa ==id), "IdMesa", "Descripcion");
+        {
+
+            ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "Marca");
+
+            ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "Descripcion");
+
+            ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result.Where(x => x.IdMesa == id), "IdMesa", "Descripcion");
 
             return View();
         }
 
-        // POST: PedidoController/Create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(Pedido pedido)
-        {          
-            var bebida = await _context.Bebida.FindAsync(pedido.IdBebida);
-            var menu = await _context.Menu.FindAsync(pedido.Idmenu);
-            var mesa = await _context.Mesa.FindAsync(pedido.IdMesa);
-
-            if (mesa.Estado != true || mesa.Estado == null)
+        public async Task<ActionResult> Create([Bind("IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
+        {
+            try
             {
-                mesa.Estado = true;
-               
-            }            
-            if (ModelState.IsValid)
-            {              
-                pedido.Fecha = DateTime.Now;
-                var precioBebida = bebida.Precio * pedido.CantidadBebida;
-                var precioMenu = menu.Precio * pedido.CantidadMenu;
-                pedido.Total = precioBebida + precioMenu;   
-                _context.Add(pedido);
-                await _context.SaveChangesAsync();                
-                return RedirectToAction(nameof(Create));
-            }   
-            
-            ViewData["bebidaMarca"] = new SelectList(_context.Bebida, "IdBebida", "IdBebida", pedido.IdBebida);          
-            ViewData["MenuDescripcion"] = new SelectList(_context.Menu, "IdMenu", "IdMenu", pedido.Idmenu);
-            ViewData["idMesa"] = new SelectList(_context.Mesa, "IdMesa", "IdMesa", pedido.IdMesa);
+                var bebida = await _bebidaService.GetById(pedido.IdBebida);
+
+                var menu = await _menuService.GetById(pedido.Idmenu);
+
+                var mesa = await _mesaService.GetById(pedido.IdMesa);
+
+                if (mesa.Estado != true || mesa.Estado == null)
+                {
+                    mesa.Estado = true;
+
+                }
+                if (ModelState.IsValid)
+                {
+                    await _pedidoService.Create(pedido, bebida.Precio, menu.Precio);
+
+                    return RedirectToAction(nameof(Create));
+                }
+            }
+            catch (ArgumentNullException ex) { return NotFound(ex.Message); }
+
+            catch (DbUpdateException ex) { return BadRequest(ex.Message); }
+
+
+            ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "IdBebida", pedido.IdBebida);
+
+            ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "IdMenu", pedido.Idmenu);
+
+            ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result, "IdMesa", "IdMesa", pedido.IdMesa);
+
             return View(pedido);
 
         }
 
-        // GET: PedidoController/Edit/5
+
         public async Task<ActionResult> Edit(int? id)
         {
-            if (id == null || _context.Pedido == null)
+         
+            try
             {
-                return NotFound();
+                var pedido = await _pedidoService.GetById(id);
+
+                ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "Marca");
+
+                ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "Descripcion");
+
+                ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result.Where(x=>x.IdMesa==id), "IdMesa", "Descripcion");
+
+                return View(pedido);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
             }
 
-            var pedido = await _context.Pedido.FindAsync(id);
-            if (pedido == null)
-            {
-                return NotFound();
-            }
-            ViewData["bebidaNombre"] = new SelectList(_context.Bebida, "IdBebida", "Nombre", pedido.IdBebida);
-            ViewData["bebidaMarca"] = new SelectList(_context.Bebida, "IdBebida", "Marca", pedido.IdBebida);
-            ViewData["MenuNombre"] = new SelectList(_context.Menu, "IdMenu", "Nombre", pedido.Idmenu);
-            ViewData["MenuDescripcion"] = new SelectList(_context.Menu, "IdMenu", "Descripcion", pedido.Idmenu);
-            ViewData["idMesa"] = new SelectList(_context.Mesa.
-                Where(x => x.Eliminar == false || x.Eliminar == null), "IdMesa", "Descripcion", pedido.IdMesa);
-
-            return View(pedido);
-           
         }
 
-        // POST: PedidoController/Edit/5
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id,Pedido pedido)
+        public async Task<ActionResult> Edit([Bind("IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
         {
-            var bebida = await _context.Bebida.FindAsync(pedido.IdBebida);
-            var menu = await _context.Menu.FindAsync(pedido.Idmenu);
-
-            if (id != pedido.IdPedido)
+            try
             {
-                return NotFound();
+                var bebida = await _bebidaService.GetById(pedido.IdBebida);
+
+                var menu = await _menuService.GetById(pedido.Idmenu);
+
+                if (ModelState.IsValid)
+                {
+                    await _pedidoService.Update(pedido,bebida.Precio,menu.Precio);
+
+                    return RedirectToAction("Details", "Pedido", new { id = pedido.IdMesa });
+                }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    pedido.Total = 0;
-                    var precioMenu = pedido.CantidadMenu * menu.Precio;
-                    var precioBebida = pedido.CantidadBebida * bebida.Precio;
-                    pedido.Total = precioMenu + precioBebida;
-                    _context.Update(pedido);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PedidoExists(pedido.IdBebida))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction("Details","Pedido", new { id = pedido.IdMesa });
-            }
-            ViewData["bebidaNombre"] = new SelectList(_context.Bebida, "IdBebida", "Nombre", pedido.IdBebida);
-            ViewData["bebidaMarca"] = new SelectList(_context.Bebida, "IdBebida", "Marca", pedido.IdBebida);
-            ViewData["MenuNombre"] = new SelectList(_context.Menu, "IdMenu", "Nombre", pedido.Idmenu);
-            ViewData["MenuDescripcion"] = new SelectList(_context.Menu, "IdMenu", "Descripcion", pedido.Idmenu);
-            ViewData["idMesa"] = new SelectList(_context.Mesa.Where(x => x.Eliminar == false || x.Eliminar == null), "IdMesa", "Descripcion", pedido.IdMesa);
+            ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "IdBebida", pedido.IdBebida);
+
+            ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "IdMenu", pedido.Idmenu);
+
+            ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result, "IdMesa", "IdMesa", pedido.IdMesa);
             return View(pedido);
         }
 
-        // GET: PedidoController/Delete/5
-        public async Task< ActionResult> Delete(int? id)
+
+        public async Task<ActionResult> Delete(int? id)
         {
-            if (id == null || _context.Pedido == null)
+            try
             {
-                return NotFound();
+                return View (await _pedidoService.GetForDelete(id));
             }
+            catch (ArgumentNullException ex)
+            {
 
-            var pedido = await _context.Pedido
-                .Include(b => b.IdBebidaNavigation)
-                .Include(b=>b.IdmenuNavigation)
-                .Include(b=>b.IdMesaNavigation)
-                .FirstOrDefaultAsync(m => m.IdPedido == id);
-            if (pedido == null)
-            {
-                return NotFound();
-            }
-            return View();
-        }
-
-        // POST: PedidoController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delete(int id)
-        {
-            if (_context.Pedido == null)
-            {
-                return Problem("Entity set 'RomaF5BdContext.Bebida'  is null.");
-            }
-            var pedido = await _context.Pedido.FindAsync(id);
-            if (pedido != null)
-            {
-                pedido.Eliminar = true;
-                _context.Update(pedido);
-                await _context.SaveChangesAsync();  
-            }
-
+                return NotFound(ex.Message);
+            }              
             
-            return RedirectToAction(nameof(Index));
+        }
+
+       
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> DeleteConfirmed([Bind("IdPedido","IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
+        {
+            string eliminar = Request.Form["Del"].ToString();
+
+            if (eliminar.Equals("si"))
+            {
+                if (pedido != null)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        try
+                        {
+                            await _pedidoService.Delete(pedido);
+                        }
+                        catch(DbUpdateException ex)
+                        {
+                            return BadRequest(ex.Message);
+                        }
+                                              
+                    }
+                    return View(nameof(Index));
+                }
+               
+            }
+            return RedirectToAction("Delete", "Pedido", new { id = pedido?.IdPedido });
         }
 
         public async Task<ActionResult> Cobrar(int? id)
@@ -210,16 +239,22 @@ namespace RomaF5patioComidas.Controllers
             {
                 return NotFound();
             }
-            var mesa = await _context.Mesa.FindAsync(id);
-            mesa.Estado = false;            
-            _context.Update(mesa);
-            await _context.SaveChangesAsync();
-           return RedirectToAction("Index", "Mesas");
+
+            var pedidoRoma = await _pedidoService.Details(id);
+            foreach (var item in pedidoRoma)
+            {
+                item.Estado = false;
+                _context.Update(item);
+            }
+
+            var mesa = await _mesaService.GetById(id);
+            await _mesaService.Update(mesa);
+
+            Response.Cookies.Append("user", "Operacion Exitosa");
+
+            return RedirectToAction("Index", "Mesas");
         }
 
-        private bool PedidoExists(int id)
-        {
-            return _context.Pedido.Any(e => e.IdPedido == id);
-        }
+       
     }
 }
