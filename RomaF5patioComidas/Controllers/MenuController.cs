@@ -1,163 +1,137 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RomaF5patioComidas.Data;
 using RomaF5patioComidas.Models;
+using RomaF5patioComidas.Services.MenuService;
 
 namespace RomaF5patioComidas.Controllers
 {
     [Authorize(Roles = "ADMIN")]
     public class MenuController : Controller
     {
-        private readonly RomaF5BdContext _context;
 
-        public MenuController(RomaF5BdContext context)
+        private readonly IMenuService _service;
+
+        public MenuController(IMenuService service)
         {
-            _context = context;
+            _service = service;
         }
 
-        // GET: Menu
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Menu.ToListAsync());
+            try
+            {
+                return View(await _service.GetMenu());
+
+            }
+            catch (ArgumentNullException)
+            {
+                return NotFound();
+            }
+
         }
 
-        // GET: Menu/Details/5
+
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Menu == null)
+            try
+            {
+                return View(await _service.GetById(id));
+            }
+            catch (ArgumentNullException)
             {
                 return NotFound();
             }
 
-            var menu = await _context.Menu
-                .FirstOrDefaultAsync(m => m.IdMenu == id);
-            if (menu == null)
-            {
-                return NotFound();
-            }
-
-            return View(menu);
         }
 
-        // GET: Menu/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Menu/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdMenu,Nombre,Precio,Descripcion,Eliminar")] Menu menu)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(menu);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _service.Create(menu);                   
+                }
+                catch (DbUpdateException ex)
+                {
+                    return NotFound(ex.Message);
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(menu);
         }
 
-        // GET: Menu/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Menu == null)
+            try
             {
-                return NotFound();
+                return View(await _service.GetById(id));
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(ex.Message);
             }
 
-            var menu = await _context.Menu.FindAsync(id);
-            if (menu == null)
-            {
-                return NotFound();
-            }
-            return View(menu);
         }
 
-        // POST: Menu/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdMenu,Nombre,Precio,Descripcion,Eliminar")] Menu menu)
+        public async Task<IActionResult> Edit([Bind("IdMenu,Nombre,Precio,Descripcion,Eliminar")] Menu menu)
         {
-            if (id != menu.IdMenu)
-            {
-                return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(menu);
-                    await _context.SaveChangesAsync();
+                    await _service.Update(menu);                  
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException ex)
                 {
-                    if (!MenuExists(menu.IdMenu))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound(ex.InnerException);
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(menu);
+
         }
 
-        // GET: Menu/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Menu == null)
+            try
+            {
+                return View(await _service.GetById(id));
+            }
+            catch (ArgumentNullException)
             {
                 return NotFound();
             }
 
-            var menu = await _context.Menu
-                .FirstOrDefaultAsync(m => m.IdMenu == id);
-            if (menu == null)
-            {
-                return NotFound();
-            }
-
-            return View(menu);
         }
 
-        // POST: Menu/Delete/5
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed([Bind("IdMenu,Nombre,Precio,Descripcion,Eliminar")] Menu menu)
         {
-            if (_context.Menu == null)
+            try
             {
-                return Problem("Entity set 'RomaF5BdContext.Menu'  is null.");
+                await _service.Delete(menu);                
             }
-            var menu = await _context.Menu.FindAsync(id);
-            if (menu != null)
+            catch (DbUpdateException ex)
             {
-                _context.Menu.Remove(menu);
+                return NotFound(ex.InnerException);
             }
-            
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MenuExists(int id)
-        {
-          return _context.Menu.Any(e => e.IdMenu == id);
-        }
     }
 }

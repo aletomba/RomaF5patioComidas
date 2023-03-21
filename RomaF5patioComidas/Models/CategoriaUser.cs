@@ -9,11 +9,12 @@ namespace RomaF5patioComidas.Models
     {
         public CategoriaUser()
         {
-            CategoriaNavigation = new HashSet<Usuario>();
+            Usuario = new HashSet<Usuario>();
         }
 
         public int IdCategoria { get; set; }
         public string Categoria { get; set; }
-        public virtual ICollection<Usuario> CategoriaNavigation { get; set; }
+
+        public virtual ICollection<Usuario> Usuario { get; set; }
     }
 }

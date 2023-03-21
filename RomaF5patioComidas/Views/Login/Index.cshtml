@@ -1,6 +1,6 @@
 ﻿@model RomaF5patioComidas.Models.Usuario
 @{
-    Layout = null;
+    Layout = null;  
 }
 <!DOCTYPE html>
 <html>
@@ -21,31 +21,34 @@
                         <img src="/img/roma.png.jpg" class="brand_logo" alt="Logo">
                     </div>
                 </div>
-                <div class="d-flex justify-content-center form_container">                    
-                     <form action="@Url.Action("Index","Home")" method="post">              
+                <div class="d-flex justify-content-center form_container">
+                    <form asp-action="Index"> 
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="input-group mb-3">
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             </div>
-                            <input type="text" name="Usuario1" class="form-control input_user" value="" placeholder="Usuario">
+                            <input asp-for="Usuario1" class="form-control"  placeholder="Usuario" autocomplete="off">                            
                         </div>
-                        <div class="input-group mb-2">
+                        <span asp-validation-for="Usuario1" class="text-danger"></span>
+                        <div class="input-group mb-2">                      
                             <div class="input-group-append">
                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                             </div>
-                            <input type="password" name="Clave" class="form-control input_pass" value="" placeholder="Contraseña">
+                            <input asp-for="Clave" type="password"  class="form-control" placeholder="Contraseña">                            
                         </div>
+                        <span asp-validation-for="Clave" class="text-danger"></span>
                         @if (ViewData["Mensaje"] != null)
                         {
                             <div class="alert alert-danger" role="alert">
                                 @ViewData["Mensaje"]
                             </div>
                         }
-                        <div class="d-flex justify-content-center mt-3 login_container">
+                        <div class=" form-group d-flex justify-content-center mt-3 login_container">
                             <button type="submit" name="button" class="btn login_btn">Iniciar Sesion</button>
                         </div>
                     </form>
-                </div>               
+                </div>
             </div>
         </div>
     </div>

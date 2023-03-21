@@ -64,9 +64,11 @@ namespace RomaF5patioComidas.Data
 
                 entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
 
-                entity.Property(e => e.Categoria).HasColumnName("categoria");
-
-                
+                entity.Property(e => e.Categoria)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("categoria");
             });
 
             modelBuilder.Entity<Menu>(entity =>
@@ -180,6 +182,8 @@ namespace RomaF5patioComidas.Data
                     .HasMaxLength(50)
                     .HasColumnName("clave");
 
+                entity.Property(e => e.Eliminar).HasColumnName("eliminar");
+
                 entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
 
                 entity.Property(e => e.Usuario1)
@@ -188,7 +192,7 @@ namespace RomaF5patioComidas.Data
                     .HasColumnName("usuario");
 
                 entity.HasOne(d => d.IdCategoriaNavigation)
-                    .WithMany(p => p.CategoriaNavigation)
+                    .WithMany(p => p.Usuario)
                     .HasForeignKey(d => d.IdCategoria)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Usuario_CategoriaUser");

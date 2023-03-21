@@ -16,11 +16,11 @@ namespace RomaF5patioComidas.Controllers
         }
 
         // GET: UsuarioController
-        public ActionResult Index()//crear el campo eliminar en la tabla usuario de tipo bool
+        public async Task<ActionResult> Index()
         {
-            //    var usuario = _context.Usuario.Include(b => b.IdCategoriaNavigation).Where(x => x.Eliminar == false || x.Eliminar == null);
-            //    return View(await romaF5BdContext.ToListAsync());
-            return View();
+            var usuario = await _context.Usuario.Include(b => b.IdCategoriaNavigation).Where(x => x.Eliminar == false || x.Eliminar == null).ToListAsync();
+            
+            return View(usuario);
         
         }
 
@@ -109,18 +109,24 @@ namespace RomaF5patioComidas.Controllers
         }
 
         // POST: UsuarioController/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, Usuario usuario)
+        public async Task< ActionResult> DeleteConfirmed(int id)
         {
-            try
+            if (_context.Bebida == null)
             {
-                return RedirectToAction(nameof(Index));
+                return Problem("Entity set 'RomaF5BdContext.Bebida'  is null.");
             }
-            catch
+            var usuario = await _context.Usuario.FindAsync(id);
+            if (usuario != null)
             {
-                return View();
+                usuario.Eliminar = true;
+                _context.Update(usuario);
+                await _context.SaveChangesAsync();
             }
+
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
