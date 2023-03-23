@@ -33,11 +33,11 @@
                                 <a class="nav-link text-white" asp-area="" asp-controller="Usuario" asp-action="Index">Usuarios</a>
                             </li>
                         }
-                       
+
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Pedido" asp-action="Index">Pedidos</a>
-                        </li>                              
-                        
+                        </li>
+
                     </ul>
                     <form class="d-flex">
                         <a class="nav-link  btn-close-white " asp-area="" asp-controller="Login" asp-action="Salir">Cerrar Sesion</a>
@@ -47,9 +47,13 @@
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        <div class="row">
+            <div class="col">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">

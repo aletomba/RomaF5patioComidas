@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RomaF5patioComidas.Data;
 using RomaF5patioComidas.Models;
+using RomaF5patioComidas.Models.ViewModels;
 using RomaF5patioComidas.Services.BebidasServices;
 using RomaF5patioComidas.Services.MenuService;
 using RomaF5patioComidas.Services.MesaService;
 using RomaF5patioComidas.Services.PedidoService;
+using RomaF5patioComidas.SessionExtension;
 
 namespace RomaF5patioComidas.Controllers
 {
@@ -75,6 +77,37 @@ namespace RomaF5patioComidas.Controllers
 
         }
 
+        public async Task<IActionResult> Add(int id)
+        {
+            try
+            {
+                var pedido = await _pedidoService.GetById(id);
+
+                List<ItemPedidosViewModel> item = HttpContext.Session.GetJson<List<ItemPedidosViewModel>>("Item") ?? new List<ItemPedidosViewModel>();
+
+                ItemPedidosViewModel pedidoItem = item.Where(c => c.IdPedido == id).FirstOrDefault();
+
+                if (pedidoItem == null)
+                {
+                    item.Add(new ItemPedidosViewModel(pedido));
+                }
+                else
+                {
+                    pedidoItem.Cantidad += 1;
+                }
+
+                HttpContext.Session.SetJson("Item", item);
+
+                TempData["Success"] = "The product has been added!";
+
+                return Redirect(Request.Headers["Referer"].ToString());
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+     
+        }
 
 
 
@@ -97,6 +130,7 @@ namespace RomaF5patioComidas.Controllers
         {
             try
             {
+               
                 var bebida = await _bebidaService.GetById(pedido.IdBebida);
 
                 var menu = await _menuService.GetById(pedido.Idmenu);
@@ -111,7 +145,7 @@ namespace RomaF5patioComidas.Controllers
                 if (ModelState.IsValid)
                 {
                     await _pedidoService.Create(pedido, bebida.Precio, menu.Precio);
-
+                    await this.Add(pedido.IdPedido);
                     return RedirectToAction(nameof(Create));
                 }
             }

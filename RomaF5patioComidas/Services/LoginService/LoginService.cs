@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace RomaF5patioComidas.Services.HomeService
 {
-    public class LoginService : IloginService
+    public class LoginService : ILoginService
     {
         private readonly RomaF5BdContext _context;
         public LoginService(RomaF5BdContext context)
@@ -16,7 +16,7 @@ namespace RomaF5patioComidas.Services.HomeService
             _context = context;
         }
 
-        public async Task<Usuario> verificarLog(Usuario usuario)
+        public async Task<Usuario> VerificarLog(Usuario usuario)
         {
             var user = await _context.Usuario.Include(x => x.IdCategoriaNavigation).
                   Where(x => x.Usuario1 == usuario.Usuario1 && x.Clave == usuario.Clave).

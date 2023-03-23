@@ -12,9 +12,9 @@ namespace RomaF5patioComidas.Controllers
     public class LoginController : Controller
     {
         
-        private readonly IloginService _loginService;
+        private readonly ILoginService _loginService;
 
-        public LoginController(IloginService loginService)
+        public LoginController(ILoginService loginService)
         {            
             _loginService = loginService;
         }
@@ -41,7 +41,7 @@ namespace RomaF5patioComidas.Controllers
             {
                 try
                 {
-                    var user = await _loginService.verificarLog(usuario);
+                    var user = await _loginService.VerificarLog(usuario);
 
                     List<Claim> c = new List<Claim>()
                     {

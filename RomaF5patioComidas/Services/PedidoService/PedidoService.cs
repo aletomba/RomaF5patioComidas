@@ -17,7 +17,7 @@ namespace RomaF5patioComidas.Services.PedidoService
         {
             return await _context.Pedido.Include(x => x.IdBebidaNavigation).
                 Include(x => x.IdmenuNavigation).Include(x => x.IdMesaNavigation).
-                Where(x => x.Eliminar == false || x.Eliminar == null && x.Fecha.Value.Date == DateTime.Today.Date)
+                Where(x => x.Eliminar == false || x.Eliminar == null && x.Fecha.Date == DateTime.Today.Date)
                 .ToListAsync() ?? throw new ArgumentNullException();
         }
 

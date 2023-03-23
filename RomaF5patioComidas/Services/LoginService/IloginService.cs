@@ -2,9 +2,9 @@
 
 namespace RomaF5patioComidas.Services.HomeService
 {
-    public interface IloginService 
+    public interface ILoginService 
     { 
-        public Task<Usuario> verificarLog(Usuario usuario);
+        public Task<Usuario> VerificarLog(Usuario usuario);
       
     }
 }

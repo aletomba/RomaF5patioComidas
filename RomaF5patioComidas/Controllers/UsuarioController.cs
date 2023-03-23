@@ -25,7 +25,7 @@ namespace RomaF5patioComidas.Controllers
         }
 
         // GET: UsuarioController/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Details()
         {
             return View();
         }
@@ -68,7 +68,7 @@ namespace RomaF5patioComidas.Controllers
         }
 
         // GET: UsuarioController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Edit()
         {
             return View();
         }

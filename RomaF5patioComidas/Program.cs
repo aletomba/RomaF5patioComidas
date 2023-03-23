@@ -11,11 +11,21 @@ using RomaF5patioComidas.Services.TipoBebidaService;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+  .AddRazorOptions(options =>
+   {
+       options.ViewLocationFormats.Add("/Components/ItemPedidos/Default.cshtml");
+   });
 builder.Services.AddDbContext<RomaF5BdContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("ConnectionDB")));
 //builder.Services.AddDistributedMemoryCache();
+builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.IsEssential = true;
+});
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
 {
     option.LoginPath = "/Login/Index";
@@ -24,7 +34,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddTransient<IBebidaService, BebidaService>();
 builder.Services.AddTransient<ITipobebidaService, TipoBebidaService>();
-builder.Services.AddTransient<IloginService,LoginService>();
+builder.Services.AddTransient<ILoginService,LoginService>();
 builder.Services.AddTransient<IMenuService,MenuService>();
 builder.Services.AddTransient<IMesaService, MesaService>();
 builder.Services.AddTransient<IPedidoService, PedidoService>();
@@ -32,6 +42,7 @@ builder.Services.AddTransient<IPedidoService, PedidoService>();
 
 
 var app = builder.Build();
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

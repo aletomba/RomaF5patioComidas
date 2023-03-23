@@ -20,7 +20,7 @@ namespace RomaF5patioComidas.Models
         public bool? Eliminar { get; set; }
         public int? IdMesa { get; set; }
         [Display(Name = "Fecha y Hora")]
-        public DateTime? Fecha { get; set; }
+        public DateTime Fecha { get; set; }
         public bool? Estado { get; set; }
 
         public virtual Bebida IdBebidaNavigation { get; set; }

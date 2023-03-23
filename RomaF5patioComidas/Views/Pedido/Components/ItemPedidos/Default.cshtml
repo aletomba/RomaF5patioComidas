@@ -1,0 +1,21 @@
+﻿@using RomaF5patioComidas.Models.ViewModels
+@model CarritoPedido
+
+@if (Model != null)
+{
+    <div class="mt-3 p-3 text-white bg-success">
+        <p>Pedidos: <span class="badge badge-primary">@Model.Numeropedidos</span></p>
+        <p>Total: <b>@Model.TotalMonto.ToString()</b></p>
+        <a class="btn btn-primary" asp-controller="Pedido" asp-action="Details">View Cart</a>
+        <a class="btn btn-danger" asp-controller="Cart" asp-action="Clear">Clear Cart</a>
+    </div>
+
+}
+else
+{
+    <div class = "mt-3 p-3 text-white bg-success">
+        <p class="lead m-0">Carrito vacio</p>
+    </div>
+    
+}
+
