@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RomaF5patioComidas.Data;
 using RomaF5patioComidas.Models;
 using RomaF5patioComidas.Models.ViewModels;
+using RomaF5patioComidas.Repository;
 using RomaF5patioComidas.Services.BebidasServices;
 using RomaF5patioComidas.Services.MenuService;
 using RomaF5patioComidas.Services.MesaService;
@@ -20,20 +21,20 @@ namespace RomaF5patioComidas.Controllers
         private readonly RomaF5BdContext _context;
         private readonly IPedidoService _pedidoService;
         private readonly IBebidaService _bebidaService;
-        private readonly IMenuService _menuService;
+        private readonly IRepository<Menu> _repository;
         private readonly IMesaService _mesaService;
 
         public PedidoController(RomaF5BdContext context, IPedidoService pedidoService,
-                                IBebidaService bebidaService, IMenuService menuService, IMesaService mesaService)
+                                IBebidaService bebidaService, IRepository<Menu> repository, IMesaService mesaService)
         {
             _context = context;
             _pedidoService = pedidoService;
-            _bebidaService = bebidaService;
-            _menuService = menuService;
+            _bebidaService = bebidaService;            
             _mesaService = mesaService;
+            _repository = repository;
         }
 
-
+        
         public async Task<ActionResult> Index()
         {
             try
@@ -54,16 +55,18 @@ namespace RomaF5patioComidas.Controllers
 
         }
 
-
+        [HttpGet]
         public async Task<ActionResult> Details(int? id)
         {
             try
             {
                 var pedidoRoma = await _pedidoService.Details(id);
+                
                 double? total = 0;
                 foreach (var item in pedidoRoma)
                 {
-                    total += item.Total;
+                    
+                    total += item.Total;                    
                 }
 
                 ViewData["Total"] = total;
@@ -77,7 +80,7 @@ namespace RomaF5patioComidas.Controllers
 
         }
 
-        public async Task<IActionResult> Add(int id)
+        public async Task<IActionResult> AddCarrito(int id)
         {
             try
             {
@@ -85,11 +88,12 @@ namespace RomaF5patioComidas.Controllers
 
                 List<ItemPedidosViewModel> item = HttpContext.Session.GetJson<List<ItemPedidosViewModel>>("Item") ?? new List<ItemPedidosViewModel>();
 
-                ItemPedidosViewModel pedidoItem = item.Where(c => c.IdPedido == id).FirstOrDefault();
+                var pedidoItem = item.Where(c => c.IdPedido == id ).FirstOrDefault();
 
-                if (pedidoItem == null)
+                if (pedidoItem == null )
                 {
                     item.Add(new ItemPedidosViewModel(pedido));
+                   
                 }
                 else
                 {
@@ -98,7 +102,7 @@ namespace RomaF5patioComidas.Controllers
 
                 HttpContext.Session.SetJson("Item", item);
 
-                TempData["Success"] = "The product has been added!";
+                ViewData["Success"] = "Pedido agregado!";
 
                 return Redirect(Request.Headers["Referer"].ToString());
             }
@@ -110,13 +114,13 @@ namespace RomaF5patioComidas.Controllers
         }
 
 
-
+        [HttpGet]
         public ActionResult Create(int? id)
         {
 
             ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "Marca");
 
-            ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "Descripcion");
+            ViewData["MenuDescripcion"] = new SelectList(_repository.GetAllAsync().Result, "IdMenu", "Descripcion");
 
             ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result.Where(x => x.IdMesa == id), "IdMesa", "Descripcion");
 
@@ -126,14 +130,14 @@ namespace RomaF5patioComidas.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind("IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
+        public async Task<ActionResult> Create([Bind("PrecioTurno","IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
         {
             try
             {
                
                 var bebida = await _bebidaService.GetById(pedido.IdBebida);
 
-                var menu = await _menuService.GetById(pedido.Idmenu);
+                var menu = await _repository.GetByIdAsync(pedido.Idmenu);
 
                 var mesa = await _mesaService.GetById(pedido.IdMesa);
 
@@ -145,7 +149,7 @@ namespace RomaF5patioComidas.Controllers
                 if (ModelState.IsValid)
                 {
                     await _pedidoService.Create(pedido, bebida.Precio, menu.Precio);
-                    await this.Add(pedido.IdPedido);
+                    await this.AddCarrito(pedido.IdPedido);
                     return RedirectToAction(nameof(Create));
                 }
             }
@@ -156,7 +160,7 @@ namespace RomaF5patioComidas.Controllers
 
             ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "IdBebida", pedido.IdBebida);
 
-            ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "IdMenu", pedido.Idmenu);
+            ViewData["MenuDescripcion"] = new SelectList(_repository.GetAllAsync().Result, "IdMenu", "IdMenu", pedido.Idmenu);
 
             ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result, "IdMesa", "IdMesa", pedido.IdMesa);
 
@@ -164,7 +168,7 @@ namespace RomaF5patioComidas.Controllers
 
         }
 
-
+        [HttpGet]
         public async Task<ActionResult> Edit(int? id)
         {
          
@@ -174,9 +178,9 @@ namespace RomaF5patioComidas.Controllers
 
                 ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "Marca");
 
-                ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "Descripcion");
+                ViewData["MenuDescripcion"] = new SelectList(_repository.GetAllAsync().Result, "IdMenu", "Descripcion");
 
-                ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result.Where(x=>x.IdMesa==id), "IdMesa", "Descripcion");
+                ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result, "IdMesa", "Descripcion");
 
                 return View(pedido);
             }
@@ -190,18 +194,19 @@ namespace RomaF5patioComidas.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind("IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
+        public async Task<ActionResult> Edit([Bind("PrecioTurno","IdPedido","IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
         {
             try
             {
+
                 var bebida = await _bebidaService.GetById(pedido.IdBebida);
 
-                var menu = await _menuService.GetById(pedido.Idmenu);
+                var menu = await _repository.GetByIdAsync(pedido.Idmenu);
 
                 if (ModelState.IsValid)
                 {
                     await _pedidoService.Update(pedido,bebida.Precio,menu.Precio);
-
+                    await this.AddCarrito(pedido.IdPedido);
                     return RedirectToAction("Details", "Pedido", new { id = pedido.IdMesa });
                 }
             }
@@ -216,31 +221,39 @@ namespace RomaF5patioComidas.Controllers
 
             ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "IdBebida", pedido.IdBebida);
 
-            ViewData["MenuDescripcion"] = new SelectList(_menuService.GetMenu().Result, "IdMenu", "IdMenu", pedido.Idmenu);
+            ViewData["MenuDescripcion"] = new SelectList(_repository.GetAllAsync().Result, "IdMenu", "IdMenu", pedido.Idmenu);
 
             ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result, "IdMesa", "IdMesa", pedido.IdMesa);
             return View(pedido);
         }
 
-
+        [HttpGet]
         public async Task<ActionResult> Delete(int? id)
         {
             try
             {
-                return View (await _pedidoService.GetForDelete(id));
+                var pedidoBorrar = await _pedidoService.GetById(id);
+
+                ViewData["bebidaMarca"] = new SelectList(_bebidaService.GetBebidas().Result, "IdBebida", "Marca");
+
+                ViewData["MenuDescripcion"] = new SelectList(_repository.GetAllAsync().Result, "IdMenu", "Descripcion");
+
+                ViewData["idMesa"] = new SelectList(_mesaService.GetMesa().Result, "IdMesa", "Descripcion");
+
+                return View (pedidoBorrar);
             }
             catch (ArgumentNullException ex)
             {
 
                 return NotFound(ex.Message);
             }              
-            
+           
         }
 
        
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed([Bind("IdPedido","IdBebida", "CantidadBebida", "Idmenu", "CantidadMenu", "IdMesa", "Estado")] Pedido pedido)
+        public async Task<ActionResult> Delete(Pedido pedido)
         {
             string eliminar = Request.Form["Del"].ToString();
 
@@ -260,7 +273,7 @@ namespace RomaF5patioComidas.Controllers
                         }
                                               
                     }
-                    return View(nameof(Index));
+                    return RedirectToAction(nameof(Index));
                 }
                
             }
@@ -269,6 +282,9 @@ namespace RomaF5patioComidas.Controllers
 
         public async Task<ActionResult> Cobrar(int? id)
         {
+            List<ItemPedidosViewModel> items = HttpContext.Session.GetJson<List<ItemPedidosViewModel>>("Item");
+            items.Clear();
+            HttpContext.Session.SetJson("Item", items);
             if (id == null)
             {
                 return NotFound();
@@ -278,7 +294,7 @@ namespace RomaF5patioComidas.Controllers
             foreach (var item in pedidoRoma)
             {
                 item.Estado = false;
-                _context.Update(item);
+                _context.Update(item);//crear un metodo en servicio que haga esto !!
             }
 
             var mesa = await _mesaService.GetById(id);

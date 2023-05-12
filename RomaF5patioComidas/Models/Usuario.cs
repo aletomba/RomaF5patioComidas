@@ -9,17 +9,14 @@ namespace RomaF5patioComidas.Models
 {
     public partial class Usuario
     {
-
         public int IdUser { get; set; }
-        [Required(ErrorMessage ="El usuario es requerido")]
-        [Display(Name = "Usuario")]
         public string Usuario1 { get; set; }
         [Required(ErrorMessage = "Contraseña es requerida")]
         [Display(Name = "Contraseña")]
         public string Clave { get; set; }
         public int IdCategoria { get; set; }
         public bool? Eliminar { get; set; }
-        [Display(Name = "Categoria")]
+
         public virtual CategoriaUser IdCategoriaNavigation { get; set; }
 
         [NotMapped]

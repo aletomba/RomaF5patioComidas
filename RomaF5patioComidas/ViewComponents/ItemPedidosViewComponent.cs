@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RomaF5patioComidas.Models;
 using RomaF5patioComidas.Models.ViewModels;
 using RomaF5patioComidas.SessionExtension;
 
@@ -10,7 +11,8 @@ namespace RomaF5patioComidas.Components
         public IViewComponentResult Invoke()
         {
             List<ItemPedidosViewModel>? Item = HttpContext.Session.GetJson<List<ItemPedidosViewModel>>("Item");
-            CarritoPedido? Carrito;
+          
+            CarritoPedido Carrito;
 
             if (Item == null || Item.Count == 0)
             {
@@ -18,11 +20,12 @@ namespace RomaF5patioComidas.Components
             }
             else
             {
+                var id = Item.Select(x=>x.IdMesa).FirstOrDefault();
                 Carrito = new()
-                {
-                    //Id = Item.Where(x => x.)
+                {                  
                     Numeropedidos = Item.Sum(x => x.Cantidad),
-                    TotalMonto = Item.Sum(x => x.Cantidad * x.Total)
+                    TotalMonto = Item.Sum(x => x.Cantidad * x.Total ), 
+                    Id = id,                   
                 };
             }
 

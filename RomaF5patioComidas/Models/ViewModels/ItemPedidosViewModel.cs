@@ -4,6 +4,8 @@ namespace RomaF5patioComidas.Models.ViewModels
 {
     public class ItemPedidosViewModel
     {
+        public int? PrecioTurno { get; set; }
+        public int? IdMesa { get; set; }
         public int IdPedido { get; set; }
         [Display(Name = "Bebida")]
         public string Bebida { get; set; }
@@ -17,7 +19,7 @@ namespace RomaF5patioComidas.Models.ViewModels
         public string Mesa { get; set; }
 
         [Display(Name = "Fecha y Hora")]
-        public DateTime Fecha { get; set; }
+        public DateTime? Fecha { get; set; }
         public double? Total { get; set; }
         public int Cantidad { get; set; }
 
@@ -27,6 +29,8 @@ namespace RomaF5patioComidas.Models.ViewModels
         }
         public ItemPedidosViewModel(Pedido pedido)
         {
+            PrecioTurno = pedido.PrecioTurno; 
+            IdMesa = pedido.IdMesa;
             IdPedido = pedido.IdPedido;
             Bebida = pedido.IdBebidaNavigation.Marca;
             CantidadBebida = pedido.CantidadBebida;
@@ -36,6 +40,7 @@ namespace RomaF5patioComidas.Models.ViewModels
             Fecha = pedido.Fecha;
             Total = pedido.Total;
             Cantidad = 1;
+
         }
 
 

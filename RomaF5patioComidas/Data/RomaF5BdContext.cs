@@ -54,7 +54,6 @@ namespace RomaF5patioComidas.Data
                 entity.HasOne(d => d.IdTipobebidaNavigation)
                     .WithMany(p => p.Bebida)
                     .HasForeignKey(d => d.IdTipobebida)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Bebida_TipoBebida");
             });
 
@@ -135,6 +134,8 @@ namespace RomaF5patioComidas.Data
                 entity.Property(e => e.IdMesa).HasColumnName("idMesa");
 
                 entity.Property(e => e.Idmenu).HasColumnName("idmenu");
+
+                entity.Property(e => e.PrecioTurno).HasColumnName("precioTurno");
 
                 entity.Property(e => e.Total).HasColumnName("total");
 

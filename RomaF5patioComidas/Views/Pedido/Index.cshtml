@@ -9,7 +9,10 @@
 
 <table class="table">
     <thead>
-        <tr>          
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PrecioTurno)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.IdBebida)
             </th>   
@@ -37,7 +40,10 @@
     <tbody>        
         @foreach (var item in Model)
         {
-            <tr>              
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PrecioTurno)
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.IdBebidaNavigation.Marca)
                 </td>  

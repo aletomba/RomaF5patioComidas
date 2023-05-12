@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RomaF5patioComidas.Models;
+using RomaF5patioComidas.Repository;
 using RomaF5patioComidas.Services.MenuService;
 
 namespace RomaF5patioComidas.Controllers
@@ -10,18 +11,21 @@ namespace RomaF5patioComidas.Controllers
     public class MenuController : Controller
     {
 
-        private readonly IMenuService _service;
-
-        public MenuController(IMenuService service)
+     
+        private readonly IRepository<Menu> _repository;
+        public MenuController(IRepository<Menu> repository)
         {
-            _service = service;
+            
+            _repository = repository;   
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                return View(await _service.GetMenu());
+                var menues = await _repository.GetAllAsync();
+                menues.Where(x => x.Eliminar == false || x.Eliminar == null);
+                return View(menues);//await _service.GetMenu());
 
             }
             catch (ArgumentNullException)
@@ -32,11 +36,11 @@ namespace RomaF5patioComidas.Controllers
         }
 
 
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
             try
             {
-                return View(await _service.GetById(id));
+                return View(await _repository.GetByIdAsync(id));
             }
             catch (ArgumentNullException)
             {
@@ -59,7 +63,8 @@ namespace RomaF5patioComidas.Controllers
             {
                 try
                 {
-                    await _service.Create(menu);                   
+                    await _repository.AddAsync(menu);
+                    await _repository.SaveChangesAsync();//_service.Create(menu);                   
                 }
                 catch (DbUpdateException ex)
                 {
@@ -70,11 +75,11 @@ namespace RomaF5patioComidas.Controllers
             return View(menu);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                return View(await _service.GetById(id));
+                return View(await _repository.GetByIdAsync(id));
             }
             catch (ArgumentNullException ex)
             {
@@ -92,7 +97,8 @@ namespace RomaF5patioComidas.Controllers
             {
                 try
                 {
-                    await _service.Update(menu);                  
+                     _repository.Update(menu);
+                    await _repository.SaveChangesAsync();
                 }
                 catch (DbUpdateException ex)
                 {
@@ -104,11 +110,11 @@ namespace RomaF5patioComidas.Controllers
 
         }
 
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                return View(await _service.GetById(id));
+                return View(await _repository.GetByIdAsync(id));
             }
             catch (ArgumentNullException)
             {
@@ -124,7 +130,9 @@ namespace RomaF5patioComidas.Controllers
         {
             try
             {
-                await _service.Delete(menu);                
+                 menu.Eliminar = true;
+                 _repository.Update(menu);
+                await _repository.SaveChangesAsync();   
             }
             catch (DbUpdateException ex)
             {

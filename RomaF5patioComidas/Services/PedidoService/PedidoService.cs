@@ -17,7 +17,7 @@ namespace RomaF5patioComidas.Services.PedidoService
         {
             return await _context.Pedido.Include(x => x.IdBebidaNavigation).
                 Include(x => x.IdmenuNavigation).Include(x => x.IdMesaNavigation).
-                Where(x => x.Eliminar == false || x.Eliminar == null && x.Fecha.Date == DateTime.Today.Date)
+                Where(x => x.Eliminar == false || x.Eliminar == null && x.Fecha.Value.Date == DateTime.Today.Date)
                 .ToListAsync() ?? throw new ArgumentNullException();
         }
 
@@ -34,8 +34,8 @@ namespace RomaF5patioComidas.Services.PedidoService
                 pedido.Estado = true;
                 var precioBebida = bebidaPrecio * pedido.CantidadBebida;
                 var precioMenu = menuPrecio * pedido.CantidadMenu;
-                pedido.Total = precioBebida + precioMenu;
-                _context.Add(pedido);
+                pedido.Total = precioBebida + precioMenu + pedido.PrecioTurno;
+                await _context.AddAsync(pedido);
                 await _context.SaveChangesAsync();
             }
             catch(DbUpdateException)
@@ -51,7 +51,7 @@ namespace RomaF5patioComidas.Services.PedidoService
             {                
                 var precioMenu = pedido.CantidadMenu * menuPrecio;
                 var precioBebida = pedido.CantidadBebida * bebidaPrecio;
-                pedido.Total = precioMenu + precioBebida;
+                pedido.Total = precioMenu + precioBebida + pedido.PrecioTurno;
                 pedido.Fecha = DateTime.Now;
                 pedido.Estado = true;
                 _context.Update(pedido);
@@ -67,10 +67,11 @@ namespace RomaF5patioComidas.Services.PedidoService
 
         public async Task Delete(Pedido pedido)
         {
+            var pedidoAborrar = await this.GetById(pedido.IdPedido);
             try
             {
-                pedido.Eliminar = true;
-                _context.Update(pedido);
+                pedidoAborrar.Eliminar = true;
+                _context.Update(pedidoAborrar);
                 await _context.SaveChangesAsync();
             }
             catch(DbUpdateException)
@@ -91,14 +92,6 @@ namespace RomaF5patioComidas.Services.PedidoService
             return pedidoRoma ?? throw new ArgumentNullException();
         }
 
-        public async Task<Pedido> GetForDelete(int? id)
-        {
-            return  await _context.Pedido.Include(x => x.IdBebidaNavigation)
-                                                   .Include(x => x.IdmenuNavigation)
-                                                   .Include(x => x.IdMesaNavigation)
-                                                   .Where(x => x.Eliminar == false || x.Eliminar == null
-                                                    && x.IdPedido == id && x.Estado == true)
-                                                   .FirstOrDefaultAsync() ?? throw new ArgumentNullException("Pedido no encontrado");
-        }
+     
     }
 }

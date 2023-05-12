@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using RomaF5patioComidas.Data;
 using RomaF5patioComidas.Models;
 using RomaF5patioComidas.Services.HomeService;
 using System.Diagnostics;

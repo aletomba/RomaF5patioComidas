@@ -12,15 +12,16 @@ namespace RomaF5patioComidas.Services.BebidasServices
         public BebidaService(RomaF5BdContext context)
         {
             _context = context;
+            
         }
 
        
         public async Task<IEnumerable<Bebida>> GetBebidas()
         {
-            var romaF5BdContext = await _context.Bebida.Include
-                                  (b => b.IdTipobebidaNavigation).
+            var romaF5BdContext = await _context.Bebida.Include(x=>x.IdTipobebidaNavigation).
                                   Where(x => x.Eliminar == false || x.Eliminar == null).ToListAsync();
-            return romaF5BdContext ?? throw new ArgumentNullException();
+           
+            return romaF5BdContext ?? Enumerable.Empty<Bebida>();
         }
 
         public async Task<Bebida> GetById(int? id)

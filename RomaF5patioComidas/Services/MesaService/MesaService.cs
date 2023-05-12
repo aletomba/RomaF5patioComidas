@@ -19,7 +19,7 @@ namespace RomaF5patioComidas.Services.MesaService
             {
                 mesa.Reserva = false;
                 mesa.Estado = false;
-                _context.Add(mesa);
+                await _context.AddAsync(mesa);               
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)

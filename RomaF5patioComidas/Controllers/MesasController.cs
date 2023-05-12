@@ -9,12 +9,12 @@ namespace RomaF5patioComidas.Controllers
     [Authorize]
     public class MesasController : Controller
     {
-       
+
         private readonly IMesaService _service;
 
         public MesasController(IMesaService service)
         {
-            
+
             _service = service;
         }
 
@@ -41,8 +41,8 @@ namespace RomaF5patioComidas.Controllers
             if (id != null) return NotFound();
             try
             {
-                return View( await _service.GetById(id));                
-            }          
+                return View(await _service.GetById(id));
+            }
             catch (BadHttpRequestException ex)
             {
                 return BadRequest(ex.Message);
@@ -65,7 +65,7 @@ namespace RomaF5patioComidas.Controllers
             {
                 try
                 {
-                    await _service.Create(mesa);                    
+                    await _service.Create(mesa);
                 }
                 catch (DbUpdateException ex)
                 {
@@ -77,15 +77,15 @@ namespace RomaF5patioComidas.Controllers
             return View(mesa);
         }
 
-
+        [HttpGet]
         [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id != null) return NotFound();
+            if (id == null) return NotFound();
             try
             {
                 return View(await _service.GetById(id));
-            }          
+            }
             catch (BadHttpRequestException ex)
             {
                 return BadRequest(ex.Message);
@@ -96,7 +96,7 @@ namespace RomaF5patioComidas.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind("IdMesa,Descripcion,Estado,Eliminar")] Mesa mesa)
-        {          
+        {
 
             if (ModelState.IsValid)
             {
@@ -106,7 +106,7 @@ namespace RomaF5patioComidas.Controllers
                 }
                 catch (DbUpdateException ex)
                 {
-                  return NotFound(ex.Message);
+                    return NotFound(ex.Message);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -121,7 +121,7 @@ namespace RomaF5patioComidas.Controllers
             try
             {
                 return View(await _service.GetById(id));
-            }           
+            }
             catch (BadHttpRequestException ex)
             {
                 return BadRequest(ex.Message);
@@ -131,7 +131,7 @@ namespace RomaF5patioComidas.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reserva(Mesa mesa)
-        {           
+        {
             if (ModelState.IsValid)
             {
                 try
@@ -158,14 +158,15 @@ namespace RomaF5patioComidas.Controllers
             catch (DbUpdateException ex)
             {
                 return NotFound(ex.Message);
-            }           
+            }
             return RedirectToAction(nameof(Index));
         }
 
         [Authorize(Roles = "ADMIN")]
+        [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id != null) return NotFound();
+            if (id == null) return NotFound();
             try
             {
                 var mesa = await _service.GetById(id);

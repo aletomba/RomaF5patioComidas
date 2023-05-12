@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using RomaF5patioComidas.Data;
+using RomaF5patioComidas.Models;
+using RomaF5patioComidas.Repository;
 using RomaF5patioComidas.Services.BebidasServices;
 using RomaF5patioComidas.Services.HomeService;
-using RomaF5patioComidas.Services.MenuService;
 using RomaF5patioComidas.Services.MesaService;
 using RomaF5patioComidas.Services.PedidoService;
 using RomaF5patioComidas.Services.TipoBebidaService;
@@ -23,7 +24,7 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromHours(2);
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(option =>
@@ -35,7 +36,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddTransient<IBebidaService, BebidaService>();
 builder.Services.AddTransient<ITipobebidaService, TipoBebidaService>();
 builder.Services.AddTransient<ILoginService,LoginService>();
-builder.Services.AddTransient<IMenuService,MenuService>();
+builder.Services.AddScoped <IRepository<Menu>,Repository<Menu>>();
 builder.Services.AddTransient<IMesaService, MesaService>();
 builder.Services.AddTransient<IPedidoService, PedidoService>();
 

@@ -85,7 +85,7 @@ namespace RomaF5patioComidas.Controllers
             ViewData["IdTipobebida"] = new SelectList(_TipoBebidaservice.GetTipoBebidas().Result, "IdTipobebida", "IdTipobebida", bebida.IdTipobebida);
             return View(bebida);
         }
-
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -95,7 +95,7 @@ namespace RomaF5patioComidas.Controllers
             try
             {
                 var bebida = await _BebidaService.GetById(id);
-                ViewData["IdTipobebida"] = new SelectList(_TipoBebidaservice.GetTipoBebidas().Result, "IdTipobebida", "Descripcion", bebida.IdTipobebida);
+                ViewData["IdTipobebida"] = new SelectList(_TipoBebidaservice.GetTipoBebidas().Result, "IdTipobebida", "Descripcion");
                 return View(bebida);
             }
             catch (Exception)

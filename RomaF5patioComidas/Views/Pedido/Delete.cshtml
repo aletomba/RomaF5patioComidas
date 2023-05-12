@@ -57,8 +57,8 @@
     </dl>
 
     <form asp-action="Delete">
-        <input type="hidden" name="Del" id="Del" value="" />
         <input type="hidden" asp-for="IdPedido" />
+        <input type="hidden" name="Del" id="Del" value="" />        
         <input type="submit" value="Delete" class="btn btn-danger" onclick="javascript:confirmar()" /> |
         <a asp-action="Index">Back to List</a>
     </form>
